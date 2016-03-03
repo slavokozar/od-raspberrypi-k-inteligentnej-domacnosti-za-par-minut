@@ -1,0 +1,139 @@
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="mobile/jquery.mobile-1.4.5.css">
+<script src="jquery.js"></script>
+<script src="mobile/jquery.mobile-1.4.5.js"></script>
+
+</head>
+<body>
+
+
+<div data-role="page" id="page-home">
+	<div data-role="header">
+  		<!-- <a href="#" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a> -->
+  		<h1>Raspberry</h1>  	
+	</div>
+  	<div data-role="main" class="ui-content">
+    	<a href="#page-led" class="ui-btn">Led</a>
+    	<a href="#page-sipo" class="ui-btn">SIPO</a>
+    	<a href="#page-adc" class="ui-btn">ADC</a>
+  	</div>
+</div>
+
+<div data-role="page" id="page-led">
+  	<div data-role="header">
+  		<a href="#page-home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  		<h1>Raspberry</h1>  	
+	</div>
+  	<div data-role="main" class="ui-content">
+  		<label for="page-led-switch">Ovladanie GPIO Output:</label>
+    	<input type="checkbox" data-role="flipswitch" id="page-led-switch">
+  	</div>
+</div>
+
+<div data-role="page" id="page-sipo">
+  	<div data-role="header">
+  		<a href="#page-home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  		<h1>Raspberry</h1>  	
+	</div>
+  	<div data-role="main" class="ui-content">
+    	<fieldset data-role="controlgroup" data-type="horizontal">
+	    	<legend>Choose as many favorite colors as you'd like:</legend>
+			<label for="page-sipo-1">&nbsp;1&nbsp;</label>
+			<input class="page-sipo-checkbox" type="checkbox" id="page-sipo-1">
+			<label for="page-sipo-2">&nbsp;2&nbsp;</label>
+			<input class="page-sipo-checkbox" type="checkbox" id="page-sipo-2">
+			<label for="page-sipo-3">&nbsp;3&nbsp;</label>
+			<input class="page-sipo-checkbox" type="checkbox" id="page-sipo-3">
+			<label for="page-sipo-4">&nbsp;4&nbsp;</label>
+			<input class="page-sipo-checkbox" type="checkbox" id="page-sipo-4">
+      	</fieldset>
+  	</div>
+</div>
+
+<div data-role="page" id="page-adc">
+  	<div data-role="header">
+  		<a href="#page-home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  		<h1>Raspberry</h1>  	
+	</div>
+  	<div data-role="main" class="ui-content">
+  		<p>Hodnota AD prevodnika: <span id="page-adc-val">12</span></p>
+  		<div style="height:60px;position:relative">
+  			<div style="border-bottom:1px solid #666;border-top:1px solid #666;position:absolute;top:30px;width:100%"></div>	
+  			<div id="page-adc-pointer" style="background:black;position:absolute;width:10px;height:40px;top:10px;left:calc(50% - 10px)" 
+  		</div>
+    	
+  	</div>
+</div>
+
+<script>
+
+var timer;
+
+$(document).on("pageshow","#page-adc",function(){ // When entering pagetwo
+    timer = setInterval(refreshAdc, 500);
+
+});
+
+$(document).on("pagehide","#page-adc",function(){ // When leaving pagetwo
+    clearInterval(timer);
+});
+
+$(document).on("change","#page-led-switch",function(){
+	var led = '1';
+	if($(this).is(':checked')){
+		led = '0';
+	}
+
+	console.log(led);
+
+	$.ajax({
+		method : 'POST',
+		url : '/rpi/led',
+		data : led
+	});
+});
+
+
+
+$(document).on("change",".page-sipo-checkbox",function(){
+	console.log("asdfasdf");
+	var leds = '';
+	$('.page-sipo-checkbox').each(function(){
+		if($(this).is(':checked')){
+			leds = '0'+leds;
+		}else{
+			leds = '1'+leds;
+		}
+	});
+
+	console.log(leds);
+
+	$.ajax({
+		method : 'POST',
+		url : '/rpi/sipo',
+		data : leds
+
+	});
+});
+
+function refreshAdc(){
+	console.log('refresh');
+	$.ajax({
+		method : 'GET',
+		url : '/rpi/adc'
+	})
+  	.done(function(data) {
+    	data = parseInt((data/255)*100)
+    	$('#page-adc-pointer').css('left','calc( '+data+'% - 10px)');
+  	});
+  
+ 
+}
+</script>
+
+
+</body>
+</html>
