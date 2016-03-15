@@ -72,4 +72,10 @@ while True:
 		print http_response
 		print ('\n');
 		client_connection.sendall(http_response)
-		client_connectio
+		client_connection.close()    
+
+	except KeyboardInterrupt:
+		GPIO.cleanup()
+		sys.exit()
+
+
